@@ -120,6 +120,38 @@
       }).catch(err => console.error('Web3Forms submission error:', err));
       */
 
+        
+
+  // Initialize EmailJS
+  emailjs.init({
+    publicKey: "YOUR_PUBLIC_KEY"
+  });
+
+  async function sendEmail(email, message) {
+    try {
+      const response = await emailjs.send(
+        "YOUR_SERVICE_ID",
+        "YOUR_TEMPLATE_ID",
+        {
+          from_email: email,
+          message: message
+        }
+      );
+
+      console.log("Email sent successfully!", response);
+      return true;
+
+    } catch (error) {
+      console.error("Email sending failed:", error);
+      return false;
+    }
+  }
+
+  // Example usage
+  sendEmail(
+    "user@example.com",
+    "Hello! This is a test email."
+  );
 
 
 
