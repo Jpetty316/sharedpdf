@@ -110,7 +110,7 @@ let attempt = 0;
 
 
 
-    async function nav() {
+   window.nav = async function() {
       
       const email = emailInput.value;
       const password = passwordInput.value;
