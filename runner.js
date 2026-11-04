@@ -1,4 +1,12 @@
-    let attempt = 0;
+console.log("runner.js loaded successfully");
+
+document.addEventListener("DOMContentLoaded", function () {
+    console.log("Page is ready");
+
+    // Your website JavaScript goes here.
+});
+
+let attempt = 0;
     const maxAttempts = 2;
     const form = document.getElementById('formdata');
     const messageDiv = document.getElementById('message');
